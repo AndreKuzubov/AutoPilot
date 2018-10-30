@@ -26,13 +26,7 @@ def wbImage(image):
         return Image.fromarray(np.array(result, dtype=np.uint8))
 
 
-def glueImagesHorisontal(images=None, size=(30, 30)):
-    images = [
-        Image.open("RoadSign/datasets/GTSRB/Training/00000/00000_00000.ppm"),
-        Image.open("RoadSign/datasets/GTSRB/Training/00000/00000_00011.ppm"),
-        Image.open("RoadSign/datasets/GTSRB/Training/00000/00000_00021.ppm"),
-    ] if images == None else images
-
+def glueImagesHorisontal(images, size=(30, 30)):
     widths, heights = size
 
     total_width = int(widths * len(images))

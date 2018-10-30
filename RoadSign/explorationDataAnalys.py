@@ -11,7 +11,7 @@ from RoadSign import utils
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-
+# TODO проверить соответсвие в аналитике с действительностью
 def datasetStatistic(picdataset):
     for item in picdataset:
         item["shortList"] = [random.choice(item['images']) for i in range(0, 5)]
