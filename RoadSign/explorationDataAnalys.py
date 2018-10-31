@@ -1,38 +1,32 @@
 from matplotlib import gridspec as gridspec
 import matplotlib.pyplot as plt
 import random
-from PIL import Image, ImageDraw
-import numpy as np
+from PIL import Image
 import glob
-import tensorflow as tf
 import os
-from RoadSign import imageProccessing
-from RoadSign import utils
+from RoadSign.utils import imageProccessing
+from RoadSign.utils import utils
+import numpy as np
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-# TODO проверить соответсвие в аналитике с действительностью
-def datasetStatistic(picdataset):
-    for item in picdataset:
-        item["shortList"] = [random.choice(item['images']) for i in range(0, 5)]
-        item['glueList'] = imageProccessing.glueImagesHorisontal(
-            images=[Image.open(imageFile) for imageFile in item['shortList']],
-            size=(30, 30)
-        )
+DEBUG = False
 
-    gs = gridspec.GridSpec(len(picdataset), 2, wspace=0.01, hspace=0.1)
-    fig = plt.figure(figsize=(7, 20))
-    ax1, axBars = [plt.subplot(gs[:, i]) for i in range(2)]
-    ax1.axis('off')
+def dataAnalitics(datasetFolder, tag):
+    dataSetImages = []
+    for path in list(next(os.walk(datasetFolder)))[1]:
+        dataSetImages += [
+            {
+                "images": [
+                    fileName for fileName in glob.glob(datasetFolder + path + "/*.ppm")
+                ],
+                "name": path,
+            }
+        ]
+    __datasetStatistic(dataSetImages, tag)
 
-    rect = axBars.barh(
-        [d['name'] for d in picdataset],
-        [len(d['images']) for d in picdataset], color="blue", height=0.8)
-    axBars.set_title('DataSet Analytics')
-    axBars.set_xlabel("count")
-    axBars.set_ylim([-0.45, len(picdataset) - 0.55])
-    # axBars.grid(True)
 
+def __datasetStatistic(picdataset, tag):
     def autolabelH(rects, ax):
         """
         Attach a text label above each bar displaying its height
@@ -43,32 +37,84 @@ def datasetStatistic(picdataset):
                     str(rect.get_width()),
                     ha='center', va='center', color="black")
 
+    for item in picdataset:
+        item["shortList"] = [random.choice(item['images']) for i in range(0, 5)]
+        item['glueList'] = imageProccessing.glueImagesHorisontal(
+            images=[Image.open(imageFile) for imageFile in item['shortList']],
+            size=(30, 30)
+        )
+
+    __logDataSetStatisticValues(picdataset=picdataset, tag=tag)
+    gs = gridspec.GridSpec(len(picdataset), 4, wspace=0.1, hspace=0.1)
+    fig = plt.figure(figsize=(7, 20))
+
+    # bars1 - кол-во в наборе
+    axBars = plt.subplot(gs[:, 2:4])
+    axBars.axis('off')
+    rect = axBars.barh(
+        [d['name'] for d in picdataset],
+        [len(d['images']) for d in picdataset], color="blue", height=0.8)
+    axBars.set_title('Count of pictures in DataSet')
+    axBars.set_xlabel("count")
+    axBars.set_ylim([-0.45, len(picdataset) - 0.55])
+    axBars.set_yticks([])
+    # axBars.grid(True)
     autolabelH(rect, axBars)
 
-    axPics = [plt.subplot(gs[i, 0]) for i in range(len(picdataset))]
+    # визуализация картинок
+    axPics = [plt.subplot(gs[i, 1]) for i in range(len(picdataset))]
     for i, axPic in enumerate(axPics):
         axPic.axis('off')
         axPic.imshow(picdataset[i]['glueList'])
 
-    utils.createNoExistsFolders("RoadSign/dataanalalysis/GTSRB")
-    fig.savefig("RoadSign/dataanalalysis/GTSRB/datasetStatistic1.png")
+    # подпись набора
+    axTexts = [plt.subplot(gs[i, 0]) for i in range(len(picdataset))]
+    for i, axText in enumerate(axTexts):
+        axText.axis('off')
+        axText.text(0.5, 0.5, picdataset[i]['name'],
+                    horizontalalignment='center',
+                    verticalalignment='center')
+
+    utils.createNoExistsFolders("RoadSign/dataanalalysis/{tag}".format(tag=tag))
+    fig.savefig("RoadSign/dataanalalysis/{tag}/datasetStatistic1.png".format(tag=tag))
     fig.show()
 
-    pass
+
+def __logDataSetStatisticValues(picdataset, tag):
+    utils.createNoExistsFolders("RoadSign/dataanalalysis/{tag}".format(tag=tag))
+    with open("RoadSign/dataanalalysis/{tag}/datasetStatistics.txt".format(tag=tag), "w+") as file:
+        for item in picdataset:
+            count = len(item['images'])
+            images = [Image.open(imageFile) for imageFile in item['images']]
+            stdSize = np.std([max(image.size) for image in images])
+            maxSize = max([max(image.size) for image in images])
+            minSize = min([min(image.size) for image in images])
+            name = item['name']
+
+            if (DEBUG):
+                print("{tag} {name} count: {count} stdSize: {stdSize} maxSize: {maxSize} minSize {minSize}".format(
+                    tag=tag,
+                    name=name,
+                    count=str(count),
+                    stdSize=str(stdSize),
+                    maxSize=str(maxSize),
+                    minSize=str(minSize),
+                ))
+            file.write(
+                "{tag} {name} count: {count} stdSize: {stdSize} maxSize: {maxSize} minSize {minSize}".format(
+                    tag=tag,
+                    name=name,
+                    count=str(count),
+                    stdSize=str(stdSize),
+                    maxSize=str(maxSize),
+                    minSize=str(minSize),
+                ) + '\n')
+        file.close()
 
 
 if __name__ == '__main__':
-    dataset = {}
-
-    dataSetImages = []
-    folder = "RoadSign/datasets/GTSRB/Training/"
-    for path in list(next(os.walk(folder)))[1]:
-        dataSetImages += [
-            {
-                "images": [
-                    fileName for fileName in glob.glob(folder + path + "/*.ppm")
-                ],
-                "name": path,
-            }
-        ]
-    datasetStatistic(dataSetImages)
+    DEBUG = True
+    dataAnalitics(
+        datasetFolder="RoadSign/datasets/GTSRB/Training/",
+        tag="GTSRB_original"
+    )
