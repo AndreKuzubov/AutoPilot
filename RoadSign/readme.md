@@ -43,3 +43,6 @@
 * https://habr.com/post/163663/
 * https://habr.com/post/142818/
 * https://habr.com/company/newprolab/blog/334618/
+* Посмотреть https://gym.openai.com
+* ГОСТ Р 52290— 2004
+* http://www.artpatch.ru/dorznaki.html
