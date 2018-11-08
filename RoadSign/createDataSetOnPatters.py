@@ -7,12 +7,19 @@ from urllib.parse import urljoin
 from RoadSign.utils import utils
 import zipfile
 import glob
+from PIL import Image
+import glob
+from RoadSign.utils import imageProccessing
+from RoadSign.utils import utils
 
+
+#
 # Загрузка шаблонов с сайта
+#
 #
 #  @Andreykuzubov 2018
 
-def getPatterns():
+def loadPatternsFromSite():
     baseUrl = "http://www.artpatch.ru/dorznaki.html"
     html = requests.get(baseUrl).text.replace("<br>", '\n <br>')
     s = lxmlHtml.fromstring(html)
@@ -55,6 +62,32 @@ def getPatterns():
             loadToLocal(category=category, url=url, name=name)
 
 
+def createDataSetFromPatterns():
+    bash_script = """magick convert ai:'{basefolder}/{filesource}'  -resize '{size}x' -density {density} '{basefolder}/{filedestination}'"""
+
+    baseFolder = os.getcwd()
+    paternsFolder = "RoadSign/datasets/patterns"
+    densityFolder = "RoadSign/datasets/fromPattern_original"
+    for category in next(os.walk(paternsFolder))[1]:
+        for fileName in next(os.walk(paternsFolder + "/" + category))[2]:
+            fileSource = paternsFolder + '/' + category + '/' + fileName
+
+            utils.createNoExistsFolders(densityFolder + '/' + category + '/' + fileName[:-3])
+            for density in range(100, 500, 50):
+                for size in range(50, 500, 50):
+                    fileDesitination = densityFolder + '/' + category + '/' + fileName[:-3] + '/' \
+                                       + str(density) + "_" + str(size) + '.png'
+                    os.system(
+                        bash_script.format(
+                            basefolder=baseFolder,
+                            filesource=fileSource,
+                            filedestination=fileDesitination,
+                            size=str(size),
+                            density=str(density))
+                    )
+            print("files created: " + fileName)
+
 
 if __name__ == "__main__":
-    getPatterns()
+    # loadPatternsFromSite()
+    createDataSetFromPatterns()

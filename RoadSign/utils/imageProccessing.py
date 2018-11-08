@@ -32,7 +32,7 @@ def glueImagesHorisontal(images, size=(30, 30)):
     total_width = int(widths * len(images))
     total_height = heights
 
-    new_im = Image.new('RGB', (total_width, total_height))
+    new_im = Image.new('RGBA', (total_width, total_height))
 
     x_offset = 0
     for im in images:

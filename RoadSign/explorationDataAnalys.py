@@ -12,14 +12,21 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 DEBUG = False
 
+#
+# Аналитика обучающих данных
+#
+#   @AndreyKuzubov 2018
+
 def dataAnalitics(datasetFolder, tag):
     dataSetImages = []
     for path in list(next(os.walk(datasetFolder)))[1]:
         dataSetImages += [
             {
                 "images": [
-                    fileName for fileName in glob.glob(datasetFolder + path + "/*.ppm")
-                ],
+                              fileName for fileName in glob.glob(datasetFolder + path + "/*.ppm")
+                          ] + [
+                              fileName for fileName in glob.glob(datasetFolder  + path + "/*.png")
+                          ],
                 "name": path,
             }
         ]
@@ -41,7 +48,7 @@ def __datasetStatistic(picdataset, tag):
         item["shortList"] = [random.choice(item['images']) for i in range(0, 5)]
         item['glueList'] = imageProccessing.glueImagesHorisontal(
             images=[Image.open(imageFile) for imageFile in item['shortList']],
-            size=(30, 30)
+            size=(50, 50)
         )
 
     __logDataSetStatisticValues(picdataset=picdataset, tag=tag)
@@ -114,7 +121,11 @@ def __logDataSetStatisticValues(picdataset, tag):
 
 if __name__ == '__main__':
     DEBUG = True
+    # dataAnalitics(
+    #     datasetFolder="RoadSign/datasets/GTSRB/Training/",
+    #     tag="GTSRB_original"
+    # )
     dataAnalitics(
-        datasetFolder="RoadSign/datasets/GTSRB/Training/",
-        tag="GTSRB_original"
+        datasetFolder="RoadSign/datasets/fromPattern_original/Запрещающие знаки/",
+        tag="fromPattern_original/Запрещающие знаки"
     )
