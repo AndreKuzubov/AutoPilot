@@ -14,6 +14,9 @@ from PIL import Image
 import glob
 from RoadSign.utils import imageProccessing
 from RoadSign.utils import utils
+import random
+import numpy as np
+import csv
 
 #
 # Загрузка шаблонов с сайта
@@ -26,31 +29,34 @@ BASE_FOLDER = os.getcwd()
 
 GTSRB_DIR = "datasets/GTSRB/"
 DORZNAKI_DIR = "datasets/DorZnaki/"
+BACKGROUND_DIR = "datasets/background/"
+DORZNAKI_PREPARED_DIR = "datasets/DorZnaki_Prepared/"
+
 
 def loadGTSRB():
-    if (not os.path.exists(GTSRB_DIR+"GTSRB_Final_Training_Images")):
+    if (not os.path.exists(GTSRB_DIR + "GTSRB_Final_Training_Images")):
         print("loading GTSRB_Final_Training_Images...")
         download_file("http://benchmark.ini.rub.de/Datasets/GTSRB_Final_Training_Images.zip",
-                      local_filename=GTSRB_DIR+"GTSRB_Final_Training_Images.zip")
+                      local_filename=GTSRB_DIR + "GTSRB_Final_Training_Images.zip")
 
         print("unzipping GTSRB_Final_Training_Images...")
-        zip_ref = zipfile.ZipFile(GTSRB_DIR+"GTSRB_Final_Training_Images.zip", 'r')
-        zip_ref.extractall(GTSRB_DIR+"GTSRB_Final_Training_Images/")
+        zip_ref = zipfile.ZipFile(GTSRB_DIR + "GTSRB_Final_Training_Images.zip", 'r')
+        zip_ref.extractall(GTSRB_DIR + "GTSRB_Final_Training_Images/")
         zip_ref.close()
-        os.remove(GTSRB_DIR+"GTSRB_Final_Training_Images.zip")
+        os.remove(GTSRB_DIR + "GTSRB_Final_Training_Images.zip")
 
         print("success GTSRB_Final_Training_Images")
 
-    if (not os.path.exists(GTSRB_DIR+"GTSRB_Final_Test_Images")):
+    if (not os.path.exists(GTSRB_DIR + "GTSRB_Final_Test_Images")):
         print("loading GTSRB_Final_Test_Images...")
         download_file("http://benchmark.ini.rub.de/Datasets/GTSRB_Final_Test_Images.zip",
-                      local_filename=GTSRB_DIR+"GTSRB_Final_Test_Images.zip")
+                      local_filename=GTSRB_DIR + "GTSRB_Final_Test_Images.zip")
 
         print("unzipping GTSRB_Final_Test_Images...")
-        zip_ref = zipfile.ZipFile(GTSRB_DIR+"GTSRB_Final_Test_Images.zip", 'r')
-        zip_ref.extractall(GTSRB_DIR+"GTSRB_Final_Test_Images/")
+        zip_ref = zipfile.ZipFile(GTSRB_DIR + "GTSRB_Final_Test_Images.zip", 'r')
+        zip_ref.extractall(GTSRB_DIR + "GTSRB_Final_Test_Images/")
         zip_ref.close()
-        os.remove(GTSRB_DIR+"GTSRB_Final_Test_Images.zip")
+        os.remove(GTSRB_DIR + "GTSRB_Final_Test_Images.zip")
 
         print("success GTSRB_Final_Test_Images")
 
@@ -63,23 +69,23 @@ def loadDorZnaki():
     def loadToLocal(category, name, url):
         response = requests.get(url, stream=True)
         response.raise_for_status()
-        utils.createNoExistsFolders(DORZNAKI_DIR+"{category}".format(category=category, name=name))
-        with open(DORZNAKI_DIR+"{category}/{name}.zip".format(category=category, name=name),
+        utils.createNoExistsFolders(DORZNAKI_DIR + "{category}".format(category=category, name=name))
+        with open(DORZNAKI_DIR + "{category}/{name}.zip".format(category=category, name=name),
                   'wb') as handle:
             for block in response.iter_content(1024):
                 handle.write(block)
 
-        zip_ref = zipfile.ZipFile(DORZNAKI_DIR+"{category}/{name}.zip".format(category=category, name=name), 'r')
+        zip_ref = zipfile.ZipFile(DORZNAKI_DIR + "{category}/{name}.zip".format(category=category, name=name), 'r')
 
-        utils.createNoExistsFolders(DORZNAKI_DIR+"{category}/zip".format(category=category, name=name))
-        zip_ref.extractall(DORZNAKI_DIR+"{category}/zip".format(category=category, name=name))
+        utils.createNoExistsFolders(DORZNAKI_DIR + "{category}/zip".format(category=category, name=name))
+        zip_ref.extractall(DORZNAKI_DIR + "{category}/zip".format(category=category, name=name))
         zip_ref.close()
 
-        filename = glob.glob(DORZNAKI_DIR+"{category}/zip/*".format(category=category))[0]
-        os.rename(filename, DORZNAKI_DIR+"{category}/{name}.ai".format(category=category, name=name))
+        filename = glob.glob(DORZNAKI_DIR + "{category}/zip/*".format(category=category))[0]
+        os.rename(filename, DORZNAKI_DIR + "{category}/{name}.ai".format(category=category, name=name))
 
-        shutil.rmtree(DORZNAKI_DIR+"{category}/zip".format(category=category))
-        os.remove(DORZNAKI_DIR+"{category}/{name}.zip".format(category=category, name=name))
+        shutil.rmtree(DORZNAKI_DIR + "{category}/zip".format(category=category))
+        os.remove(DORZNAKI_DIR + "{category}/{name}.zip".format(category=category, name=name))
         print("loaded {name}".format(name=name))
 
     content = s.xpath('//*[@id="content"]')[0]
@@ -99,27 +105,78 @@ def loadDorZnaki():
             name = child.text_content().replace('\n', '')
             name = name.replace(' ', '_')
             if not os.path.exists(
-                    DORZNAKI_DIR+"{category}/{name}.ai".format(category=category, name=name)):
+                    DORZNAKI_DIR + "{category}/{name}.ai".format(category=category, name=name)):
                 loadToLocal(category=category, url=url, name=name)
 
             if not os.path.exists(
-                    DORZNAKI_DIR+"{category}/{name}.png".format(category=category, name=name)):
+                    DORZNAKI_DIR + "{category}/{name}.png".format(category=category, name=name)):
                 bash_script = """magick convert ai:'{basefolder}/{filesource}'  -resize '{size}x' -density {density} '{basefolder}/{filedestination}'"""
                 os.system(
                     bash_script.format(
                         basefolder=BASE_FOLDER,
-                        filesource=DORZNAKI_DIR+"{category}/{name}.ai".format(category=category,
-                                                                                   name=name),
-                        filedestination=DORZNAKI_DIR+"{category}/{name}.png".format(category=category,
-                                                                                         name=name),
+                        filesource=DORZNAKI_DIR + "{category}/{name}.ai".format(category=category,
+                                                                                name=name),
+                        filedestination=DORZNAKI_DIR + "{category}/{name}.png".format(category=category,
+                                                                                      name=name),
                         size=str(IMAGE_SIZE),
                         density=str(100))
                 )
                 print("files created: " + "{name}.png".format(category=category, name=name))
 
 
+def loadBackGroundImages():
+    print("loading backgrounds...")
+    download_file("https://storage.googleapis.com/openimages/2018_04/image_ids_and_rotation.csv",
+                  local_filename=BACKGROUND_DIR + "image_ids_and_rotation.csv")
+
+    with open(BACKGROUND_DIR + "image_ids_and_rotation.csv", "r") as csvfile:
+        datareader = csv.reader(csvfile)
+        next(datareader)
+        for row in datareader:
+            url = row[2]
+            name = url[url.rfind("/") + 1:]
+            print("loading backgrounds... %s" % (name,))
+            download_file(url, local_filename=BACKGROUND_DIR + name)
+
+
+def generateBackgroundImage(imageSize=IMAGE_SIZE):
+    return Image.new('RGBA', (IMAGE_SIZE, IMAGE_SIZE))
+
+
+def generateDorZnakiBanches(class_image_count=10000):
+    MIN_SIZE_SCALE = 0.5
+
+    classes_files = glob.glob(DORZNAKI_DIR + "*/*.png")
+
+    for class_file in classes_files:
+        class_name = class_file[class_file.rfind("/") + 1:-4]
+        print("generate for class %s" % (class_name))
+
+        for i in range(class_image_count):
+            base_img = generateBackgroundImage()
+
+            image = Image.open(class_file).convert('RGBA')
+            sign_size = int(random.uniform(MIN_SIZE_SCALE, 1.) * IMAGE_SIZE)
+            image = image.resize((sign_size, sign_size), Image.ANTIALIAS)
+            paste_point = (
+                int(random.random() * (IMAGE_SIZE - sign_size)),
+                int(random.random() * (IMAGE_SIZE - sign_size)))
+            base_img.paste(image, box=(paste_point))
+
+            blurBoxSize = int(random.random() * 10)
+            if blurBoxSize > 0:
+                base_img = imageProccessing.boxFilter(base_img, boxSize=blurBoxSize, padding="SAME")
+
+            utils.createNoExistsFolders(DORZNAKI_PREPARED_DIR + class_name)
+            # base_img.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(i) + ".png")
+            base_img.show()
+
+        break
+
+
 if __name__ == "__main__":
+    loadBackGroundImages()
     loadGTSRB()
 
     loadDorZnaki()
-
+    generateDorZnakiBanches(10)

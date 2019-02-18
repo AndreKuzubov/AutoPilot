@@ -84,6 +84,40 @@ def blur(sourceFile, destinationFile, radius=100, sigma=1):
     ))
 
 
+def boxFilter(sourceImage, boxSize=3, boxScalar=None, padding="VALID"):
+    """
+    box фильтр - размытие изображения
+    :param sourceImage: исходное изображение
+    :param boxScalar: множетель ядра фильтра - определяет яркость полученного зображения
+            если boxScalar = 1/boxSize**2 - яркость не меняется
+    :param padding: исходное изображение
+    :return: обработанное изображение
+    """
+    if (boxScalar is None):
+        boxScalar = 1. / boxSize ** 2
+
+    x_image = tf.constant(np.asarray(sourceImage).astype(np.float32), dtype=tf.float32)
+    x_image = tf.transpose(x_image, [2, 0, 1])
+    x_image = tf.reshape(x_image, [n.value for n in x_image.shape] + [1])
+
+    kernel = tf.constant(boxScalar * np.asarray([[1] * boxSize] * boxSize), dtype=tf.float32)
+    kernel = tf.reshape(kernel, [boxSize, boxSize, 1, 1])
+
+    filtered = tf.nn.conv2d(x_image, kernel, strides=[1, 1, 1, 1], padding=padding)
+
+    with tf.Session() as sess:
+        y_image, = sess.run([filtered])
+
+    y_image = y_image.transpose((3, 1, 2, 0,))
+    y_image = y_image.reshape(y_image.shape[1:])
+
+    # обработка засветов
+    y_image = np.minimum(y_image, 255)
+    y_image = np.maximum(y_image, 0)
+    newImage = Image.fromarray(y_image.astype(np.uint8), sourceImage.mode)
+    return newImage
+
+
 def glueImagesHorisontal(images, size=(30, 30)):
     widths, heights = size
 

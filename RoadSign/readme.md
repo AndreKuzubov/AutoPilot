@@ -9,7 +9,7 @@
      
         * [x] Набор [<b>GTSRB</b>](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset)
         * [x] Набор [<b>DorZnaki</b>](http://www.artpatch.ru/dorznaki.html) 
-        * [ ] Набор фоновых картинок
+        * [x] Набор фоновых картинок [openimages](https://storage.googleapis.com/openimages/web/index.html)
          
     * [ ] Создание всех возможных (допустимых) искажений (Освещение, обрезка, повороты).
         
