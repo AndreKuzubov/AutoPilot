@@ -33,6 +33,7 @@
    
    * HomeBrew - https://brew.sh/index_ru
    * ImageMagic - http://www.imagemagick.org/script/download.php
+   * ghostscript - https://github.com/delphian/drupal-convert-file/wiki/Installing-ImageMagick-on-Mac-OSX-for-PHP-and-MAMP
    * Python 3 
    * TensorFlow
 
