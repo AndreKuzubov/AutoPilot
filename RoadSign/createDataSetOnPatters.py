@@ -17,6 +17,7 @@ from RoadSign.utils import utils
 import random
 import numpy as np
 import csv
+import uuid
 
 #
 # Загрузка шаблонов с сайта
@@ -139,11 +140,32 @@ def loadBackGroundImages():
             download_file(url, local_filename=BACKGROUND_DIR + name)
 
 
-def generateBackgroundImage(imageSize=IMAGE_SIZE):
-    return Image.new('RGBA', (IMAGE_SIZE, IMAGE_SIZE))
+def generateBackgroundImage(imageSize=IMAGE_SIZE, transparent=None):
+    """
+
+    :param imageSize:
+    :param transparent: None - не делать получпрозрачным
+             иначе максимальное значение прозрачности (0-1)
+    :return:
+    """
+    file = random.choice(glob.glob(BACKGROUND_DIR + "*"))
+    im = Image.open(file).convert("RGBA")
+
+    cropsize = (int(random.random() * im.size[0]), int(random.random() * im.size[1]))
+    cropPoint = (int(random.random() * (im.size[0] - cropsize[0])), int(random.random() * (im.size[1] - cropsize[1])))
+    im = im.crop((cropPoint[0], cropPoint[1], cropPoint[0] + cropsize[0], cropPoint[1] + cropsize[1]))
+    im = im.resize((imageSize, imageSize))
+
+    if (not transparent is None):
+        pixeldata = list(im.getdata())
+        for i, pixel in enumerate(pixeldata):
+            pixeldata[i] = pixel[:3] + (int(random.random() * transparent * 255),)
+
+        im.putdata(pixeldata)
+    return im
 
 
-def generateDorZnakiBanches(class_image_count=10000):
+def generateDorZnakiBanches(class_image_count=50000):
     MIN_SIZE_SCALE = 0.5
 
     classes_files = glob.glob(DORZNAKI_DIR + "*/*.png")
@@ -155,27 +177,30 @@ def generateDorZnakiBanches(class_image_count=10000):
         for i in range(class_image_count):
             base_img = generateBackgroundImage()
 
-            image = Image.open(class_file).convert('RGBA')
+            image = Image.open(class_file).convert("RGBA")
             sign_size = int(random.uniform(MIN_SIZE_SCALE, 1.) * IMAGE_SIZE)
             image = image.resize((sign_size, sign_size), Image.ANTIALIAS)
             paste_point = (
                 int(random.random() * (IMAGE_SIZE - sign_size)),
                 int(random.random() * (IMAGE_SIZE - sign_size)))
-            base_img.paste(image, box=(paste_point))
+            base_img.paste(image, box=(paste_point), mask=image)
 
             blurBoxSize = int(random.random() * 10)
             if blurBoxSize > 0:
                 base_img = imageProccessing.boxFilter(base_img, boxSize=blurBoxSize, padding="SAME")
 
+            # color correction, dirty window
+            base_img.alpha_composite(generateBackgroundImage(transparent=random.random() * 0.4))
+
             utils.createNoExistsFolders(DORZNAKI_PREPARED_DIR + class_name)
-            # base_img.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(i) + ".png")
+            base_img.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(uuid.uuid4()) + ".png")
             base_img.show()
 
         break
 
 
 if __name__ == "__main__":
-    loadBackGroundImages()
+    # loadBackGroundImages()
     loadGTSRB()
 
     loadDorZnaki()
