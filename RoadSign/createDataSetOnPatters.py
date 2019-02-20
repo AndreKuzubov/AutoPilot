@@ -25,7 +25,7 @@ import uuid
 #
 #  @Andreykuzubov 2018
 
-IMAGE_SIZE = 512
+IMAGE_SIZE = 100
 BASE_FOLDER = os.getcwd()
 
 GTSRB_DIR = "datasets/GTSRB/"
@@ -148,8 +148,14 @@ def generateBackgroundImage(imageSize=IMAGE_SIZE, transparent=None):
              иначе максимальное значение прозрачности (0-1)
     :return:
     """
-    file = random.choice(glob.glob(BACKGROUND_DIR + "*"))
-    im = Image.open(file).convert("RGBA")
+    while True:
+        file = random.choice(glob.glob(BACKGROUND_DIR + "*.jpg") + glob.glob(BACKGROUND_DIR + "*.png"))
+        try:
+            im = Image.open(file).convert("RGBA")
+            break
+        except:
+            print("remove %s" % (file))
+            os.remove(file)
 
     cropsize = (int(random.random() * im.size[0]), int(random.random() * im.size[1]))
     cropPoint = (int(random.random() * (im.size[0] - cropsize[0])), int(random.random() * (im.size[1] - cropsize[1])))
@@ -166,18 +172,37 @@ def generateBackgroundImage(imageSize=IMAGE_SIZE, transparent=None):
 
 
 def generateDorZnakiBanches(class_image_count=50000):
-    MIN_SIZE_SCALE = 0.5
+    MIN_SIZE_SCALE = 0.7
 
-    classes_files = glob.glob(DORZNAKI_DIR + "*/*.png")
+    classes_files = glob.glob(DORZNAKI_DIR + "Запрещающие_знаки/*.png")
+    random.shuffle(classes_files)
 
     for class_file in classes_files:
         class_name = class_file[class_file.rfind("/") + 1:-4]
         print("generate for class %s" % (class_name))
+        if (os.path.exists(DORZNAKI_PREPARED_DIR + class_name)):
+            continue
 
         for i in range(class_image_count):
+            if i % 100 == 0:
+                print("i = %s" % (i))
+
             base_img = generateBackgroundImage()
 
-            image = Image.open(class_file).convert("RGBA")
+            image = sourceImage = Image.open(class_file).convert("RGBA")
+
+            ratio = random.uniform(0.7, 2)
+            image = image.resize(
+                (int(IMAGE_SIZE / ratio), int(IMAGE_SIZE * ratio)),
+                Image.ANTIALIAS)
+            image = image.rotate(random.random() * 90. - 45.)
+            ratio = random.uniform(0.5, 4)
+            image = image.resize(
+                (int(IMAGE_SIZE / ratio), int(IMAGE_SIZE * ratio)),
+                Image.ANTIALIAS)
+            # darken, lighten
+            image = imageProccessing.boxFilter(image, boxSize=1, boxScalar=random.uniform(0.5, 1.5), padding="SAME")
+
             sign_size = int(random.uniform(MIN_SIZE_SCALE, 1.) * IMAGE_SIZE)
             image = image.resize((sign_size, sign_size), Image.ANTIALIAS)
             paste_point = (
@@ -185,7 +210,7 @@ def generateDorZnakiBanches(class_image_count=50000):
                 int(random.random() * (IMAGE_SIZE - sign_size)))
             base_img.paste(image, box=(paste_point), mask=image)
 
-            blurBoxSize = int(random.random() * 10)
+            blurBoxSize = int(random.random() * 3)
             if blurBoxSize > 0:
                 base_img = imageProccessing.boxFilter(base_img, boxSize=blurBoxSize, padding="SAME")
 
@@ -194,14 +219,16 @@ def generateDorZnakiBanches(class_image_count=50000):
 
             utils.createNoExistsFolders(DORZNAKI_PREPARED_DIR + class_name)
             base_img.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(uuid.uuid4()) + ".png")
-            base_img.show()
+            # base_img.show()
 
-        break
+            image.close()
+            sourceImage.close()
+            base_img.close()
 
 
 if __name__ == "__main__":
     # loadBackGroundImages()
-    loadGTSRB()
+    # loadGTSRB()
 
-    loadDorZnaki()
-    generateDorZnakiBanches(10)
+    # loadDorZnaki()
+    generateDorZnakiBanches(1000)
