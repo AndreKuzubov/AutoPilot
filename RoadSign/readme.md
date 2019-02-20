@@ -23,9 +23,28 @@
 2) [Обучение ИНС](trainigCNN.py)
 
     * [ ] Классификатор
+    
+        * [ ] На базе готовых
+        
+            * [ ] Xception
+            * [ ] VGG16
+            * [ ] VGG19
+            * [ ] ResNet, ResNetV2, ResNeXt
+            * [ ] InceptionV3
+            * [ ] InceptionResNetV2
+            * [ ] MobileNet
+            * [ ] MobileNetV2
+            * [ ] DenseNet
+            * [ ] NASNet
+            
+        * [ ] Собственная разработка
+        
     * [ ] Обнаружение и локализация
+    
         * [ ] Yolo detetction
+        
         * [ ] Обнаружение с использованием фильтров и выделения фигур
+        
     * [ ] Перенос на систему реального времени
     
     
