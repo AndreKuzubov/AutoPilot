@@ -1,0 +1,29 @@
+## Исследование готовых моделей ImageNet
+
+#### Модели:
+
+ * [ ] Xception
+ * [ ] VGG16
+ * [ ] VGG19
+ * [ ] ResNet, ResNetV2, ResNeXt
+ * [ ] InceptionV3
+ * [ ] InceptionResNetV2
+ * [ ] MobileNet
+ * [ ] MobileNetV2
+ * [ ] DenseNet
+ * [ ] NASNet
+   
+  
+    
+#### Enviroment
+   
+   * Python 3 
+   * TensorFlow
+
+
+### References
+* https://keras.io/applications/
+* [DenseNet (YouTube)](https://www.youtube.com/watch?v=-W6y8xnd--U)
+* [MobileNet](https://habr.com/ru/post/352804/)
+* [NASNet](https://towardsdatascience.com/everything-you-need-to-know-about-automl-and-neural-architecture-search-8db1863682bf)
+
