@@ -22,6 +22,7 @@
 
  * [createDataSetOnPatters.py](createDataSetOnPatters.py) - генерирование наборов картинок для обучения 
  * [explorationDataAnalys.py](explorationDataAnalys.py) - аналитика по сгенерированным картинкам
+ * [ImageNetModels/start_test_all_models.py](ImageNetModels/start_test_all_models.py) - сравнение предобученных моделей на стандартных картинках
   
 
    
