@@ -2,16 +2,16 @@
 
 #### Модели:
 
- * [ ] Xception
+ * [x] Xception
  * [ ] VGG16
  * [ ] VGG19
- * [ ] ResNet, ResNetV2, ResNeXt
- * [ ] InceptionV3
+ * [x] ResNet, ResNetV2, ResNeXt
+ * [x] InceptionV3
  * [ ] InceptionResNetV2
- * [ ] MobileNet
- * [ ] MobileNetV2
- * [ ] DenseNet
- * [ ] NASNet
+ * [x] MobileNet
+ * [x] MobileNetV2
+ * [x] DenseNet
+ * [x] NASNet
    
   
     
