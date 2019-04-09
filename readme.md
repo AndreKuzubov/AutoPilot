@@ -20,13 +20,27 @@
 
 ## Точки входа
 
- * [createDataSetOnPatters.py](createDataSetOnPatters.py) - генерирование наборов картинок для обучения 
- * [explorationDataAnalys.py](explorationDataAnalys.py) - аналитика по сгенерированным картинкам
+ * [RoadSign/createDataSetOnPatters.py](RoadSign/createDataSetOnPatters.py) - генерирование наборов картинок для обучения 
+ 
+ * [RoadSign/explorationDataAnalys.py](RoadSign/explorationDataAnalys.py) - аналитика по сгенерированным картинкам
+ 
  * [ImageNetModels/start_test_all_models.py](ImageNetModels/start_test_all_models.py) - сравнение предобученных моделей на стандартных картинках
-  
+         
+ * [RoadSign/start_to_train_sign_recognation.py](RoadSign/start_to_train_sign_recognation.py)
+     <b>Запуск:</b>
+     
+            >> cd <dir>/RoadSign
+            >> python start_to_train_sign_recognation.py
+            >> tensorboard --logdir=log/tensorboard 
+        
+     далее пройти по ссылке: [http://localhost:6006](http://localhost:6006) 
 
-   
- ## License
+
+## Enviroment
+    
+  * https://pypi.org/project/transliterate/  
+       
+## License
 ```
 Copyright (c) 2019 Andrey Kuzubov
 ```     

@@ -36,13 +36,25 @@ def getModel(inputSize, classesCount=1000):
     return model
 
 
-def decodeClasses(predictedClasses, top=3):
+def decodeClasses(predictedClasses, top=3, customClasses=None):
     """
     декодирование полученных классов по предсказанным этой моделью.
 
     :param predictedClasses:
+    :param customClasses: должен всегда использоватся, если модель обучена не на imagenet
     :return:
     """
+    if (not customClasses is None):
+        decodedClasses = []
+        for predictClass in predictedClasses:
+            mapClasses = [{
+                "className": ("i" + str(i), customClasses[i], pred),
+                "pred": pred
+            } for i, pred in enumerate(predictClass)]
+            mapClassesBest = sorted(mapClasses, key=lambda k: k['pred'], reverse=True)
+            decodedClasses += [[cl["className"] for cl in mapClassesBest[:top]]]
+        return decodedClasses
+
     return keras.applications.mobilenet.decode_predictions(predictedClasses, top=top)
 
 def preprocess_images(imgs):

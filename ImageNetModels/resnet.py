@@ -10,6 +10,7 @@ import tensorflow as tf
 
 RESNET50_PATH = "log/models/RESNET50_{input_size}_{classes}.h5"
 
+
 def getModel(inputSize, classesCount=1000):
     """
 
@@ -34,18 +35,32 @@ def getModel(inputSize, classesCount=1000):
     return model
 
 
-def decodeClasses(predictedClasses, top=3):
+def decodeClasses(predictedClasses, top=3, customClasses=None):
     """
     декодирование полученных классов по предсказанным этой моделью.
 
     :param predictedClasses:
+    :param customClasses: должен всегда использоватся, если модель обучена не на imagenet
     :return:
     """
+    if (not customClasses is None):
+        decodedClasses = []
+        for predictClass in predictedClasses:
+            mapClasses = [{
+                "className": ("i" + str(i), customClasses[i], pred),
+                "pred": pred
+            } for i, pred in enumerate(predictClass)]
+            mapClassesBest = sorted(mapClasses, key=lambda k: k['pred'], reverse=True)
+            decodedClasses += [[cl["className"] for cl in mapClassesBest[:top]]]
+        return decodedClasses
+
     return keras.applications.resnet50.decode_predictions(predictedClasses, top=top)
+
 
 def preprocess_images(imgs):
     x = np.array([image.img_to_array(img) for img in imgs])
     return keras.applications.xception.preprocess_input(x)
+
 
 def predict(model, img):
     x = image.img_to_array(img)
