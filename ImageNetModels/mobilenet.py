@@ -8,7 +8,7 @@ import RoadSign.utils.utils as utils
 from keras.models import load_model
 import tensorflow as tf
 
-MobileNet_PATH = "log/models/MobileNet_{input_size}.h5"
+MobileNet_PATH = "log/models/MobileNet_{input_size}_{classes}.h5"
 
 
 def getModel(inputSize, classesCount=1000):
@@ -20,13 +20,14 @@ def getModel(inputSize, classesCount=1000):
             ожидается в виде массива [sizeW,sizeH,channelsCount]
     :return:
     """
-    path = MobileNet_PATH.format(input_size=str(inputSize))
+    path = MobileNet_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
         return load_model(path)
 
     model = keras.applications.mobilenet.MobileNet(input_shape=None, alpha=1.0, depth_multiplier=1, dropout=1e-3,
                                                    input_tensor=keras.Input(shape=inputSize),
-                                                   include_top=True, weights='imagenet',
+                                                   include_top=True,
+                                                   weights='imagenet' if classesCount == 1000 else None,
                                                    pooling=None, classes=classesCount)
     if not os.path.exists(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))
@@ -44,6 +45,9 @@ def decodeClasses(predictedClasses, top=3):
     """
     return keras.applications.mobilenet.decode_predictions(predictedClasses, top=top)
 
+def preprocess_images(imgs):
+    x = np.array([image.img_to_array(img) for img in imgs])
+    return keras.applications.xception.preprocess_input(x)
 
 def predict(model, img):
     x = image.img_to_array(img)

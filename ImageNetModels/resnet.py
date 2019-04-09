@@ -8,7 +8,7 @@ import RoadSign.utils.utils as utils
 from keras.models import load_model
 import tensorflow as tf
 
-RESNET50_PATH = "log/models/RESNET50_{input_size}.h5"
+RESNET50_PATH = "log/models/RESNET50_{input_size}_{classes}.h5"
 
 def getModel(inputSize, classesCount=1000):
     """
@@ -19,11 +19,12 @@ def getModel(inputSize, classesCount=1000):
             ожидается в виде массива [sizeW,sizeH,channelsCount]
     :return:
     """
-    path = RESNET50_PATH.format(input_size=str(inputSize))
+    path = RESNET50_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
         return load_model(path)
 
-    model = keras.applications.resnet50.ResNet50(include_top=True, weights='imagenet',
+    model = keras.applications.resnet50.ResNet50(include_top=True,
+                                                 weights='imagenet' if classesCount == 1000 else None,
                                                  input_tensor=keras.Input(shape=inputSize),
                                                  input_shape=None, pooling=None, classes=classesCount)
     if not os.path.exists(os.path.dirname(path)):
@@ -42,6 +43,9 @@ def decodeClasses(predictedClasses, top=3):
     """
     return keras.applications.resnet50.decode_predictions(predictedClasses, top=top)
 
+def preprocess_images(imgs):
+    x = np.array([image.img_to_array(img) for img in imgs])
+    return keras.applications.xception.preprocess_input(x)
 
 def predict(model, img):
     x = image.img_to_array(img)
