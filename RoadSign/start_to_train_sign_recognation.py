@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
         model = load_model(loadModelPath)
 
-        batch_images, batch_labels = next_
+        batch_images, batch_labels = next_batch(batch_size=testBatchSize)
         batch_x = modelSetting[1].preprocess_images(batch_images)
         batch_y = np.array(batch_labels)
         startTime = time.time()
