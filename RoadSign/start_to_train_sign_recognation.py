@@ -5,6 +5,7 @@
 import datetime
 import os
 import sys
+import time
 
 from keras.callbacks import ModelCheckpoint
 from keras.preprocessing import image
@@ -114,8 +115,9 @@ if __name__ == "__main__":
                                 ])
         model.save(saveModelPath)
 
-    for modelSetting in TEST_MODELS[:1]:
+    for modelSetting in TEST_MODELS:
         print("modeltesting: %s..." % (modelSetting[0]))
+        testBatchSize = 100
         processedImagesByModelFolder = PROCESSED_IMAGES_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
         logTrainPath = TENSOR_BOARD_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
         loadModelPath = TRAINED_MODEL_FOLDER.format(model=modelSetting[0], inputsize=str(IMAGE_INPUT_SIZE),
@@ -127,11 +129,14 @@ if __name__ == "__main__":
 
         model = load_model(loadModelPath)
 
-        batch_images, batch_labels = next_batch(batch_size=100)
+        batch_images, batch_labels = next_
         batch_x = modelSetting[1].preprocess_images(batch_images)
         batch_y = np.array(batch_labels)
+        startTime = time.time()
         score = model.evaluate(batch_x, batch_y, verbose=0)
-        print("Model: %s Test score: %f Test accuracy: %f " % (modelSetting[0], score[0], score[1]))
+        endTime = time.time()
+        print("Model: %s Test score: %.4f Test accuracy: %.4f SprendTime %.4f for batch %d" % (
+        modelSetting[0], score[0], score[1], endTime - startTime, testBatchSize))
 
         imgs, img_names = next_batch(batch_size=20, yAsNames=True)
         batch_imgs_tensor = modelSetting[1].preprocess_images(imgs)
