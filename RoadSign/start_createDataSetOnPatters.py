@@ -32,6 +32,11 @@ GTSRB_DIR = "datasets/GTSRB/"
 DORZNAKI_DIR = "datasets/DorZnaki/"
 BACKGROUND_DIR = "datasets/background/"
 DORZNAKI_PREPARED_DIR = "datasets/DorZnaki_Prepared/"
+BACKGROUND_IMAGES = glob.glob(BACKGROUND_DIR + "*.jpg") + glob.glob(BACKGROUND_DIR + "*.png")
+
+BACKGROUND_IMAGES_BUFFER = 10
+
+backgroundImages = []
 
 
 def loadGTSRB():
@@ -148,33 +153,55 @@ def generateBackgroundImage(imageSize=IMAGE_SIZE, transparent=None):
              иначе максимальное значение прозрачности (0-1)
     :return:
     """
-    while True:
+    global backgroundImages
+
+    def popFromBuffer():
+        img = backgroundImages[0]
+        del backgroundImages[0]
+
+        if (not transparent is None):
+            pixeldata = list(img.getdata())
+            for i, pixel in enumerate(pixeldata):
+                pixeldata[i] = pixel[:3] + (int(random.random() * transparent * 255),)
+
+            img.putdata(pixeldata)
+
+        return img
+
+    if len(backgroundImages) > 0:
+        return popFromBuffer()
+
+    while len(backgroundImages) < BACKGROUND_IMAGES_BUFFER:
         file = random.choice(glob.glob(BACKGROUND_DIR + "*.jpg") + glob.glob(BACKGROUND_DIR + "*.png"))
         try:
             im = Image.open(file).convert("RGBA")
-            break
+
+            backgroundImages += [im]
         except:
             print("remove %s" % (file))
             os.remove(file)
 
-    cropsize = (int(random.random() * im.size[0]), int(random.random() * im.size[1]))
-    cropPoint = (int(random.random() * (im.size[0] - cropsize[0])), int(random.random() * (im.size[1] - cropsize[1])))
-    im = im.crop((cropPoint[0], cropPoint[1], cropPoint[0] + cropsize[0], cropPoint[1] + cropsize[1]))
-    im = im.resize((imageSize, imageSize))
+    for i in range(len(backgroundImages)):
+        im = backgroundImages[i]
+        cropsize = (int(random.random() * im.size[0]), int(random.random() * im.size[1]))
+        cropPoint = (
+            int(random.random() * (im.size[0] - cropsize[0])), int(random.random() * (im.size[1] - cropsize[1])))
+        im = im.crop((cropPoint[0], cropPoint[1], cropPoint[0] + cropsize[0], cropPoint[1] + cropsize[1]))
+        im = im.resize((imageSize, imageSize))
+        backgroundImages[i] = im
 
-    if (not transparent is None):
-        pixeldata = list(im.getdata())
-        for i, pixel in enumerate(pixeldata):
-            pixeldata[i] = pixel[:3] + (int(random.random() * transparent * 255),)
-
-        im.putdata(pixeldata)
-    return im
+    return popFromBuffer()
 
 
 def generateDorZnakiBanches(class_image_count=50000):
     MIN_SIZE_SCALE = 0.7
 
-    classes_files = glob.glob(DORZNAKI_DIR + "Запрещающие_знаки/*.png")
+    classes_files = glob.glob(DORZNAKI_DIR + "Запрещающие_знаки/*.png") \
+                    + glob.glob(DORZNAKI_DIR + "Предупреждающие_знаки/*.png") \
+                    + glob.glob(DORZNAKI_DIR + "Предписывающие_знаки/*.png") \
+                    + glob.glob(DORZNAKI_DIR + "Знаки_приоритета/*.png") \
+                    + glob.glob(DORZNAKI_DIR + "Знаки_особых_предписаний/*.png")
+
     random.shuffle(classes_files)
 
     for class_file in classes_files:
@@ -183,13 +210,17 @@ def generateDorZnakiBanches(class_image_count=50000):
         if (os.path.exists(DORZNAKI_PREPARED_DIR + class_name)):
             continue
 
+        utils.createNoExistsFolders(DORZNAKI_PREPARED_DIR + class_name)
+
+        imagesBuffer = []
+        sourceImage = Image.open(class_file).convert("RGBA")
         for i in range(class_image_count):
             if i % 100 == 0:
                 print("i = %s" % (i))
 
             base_img = generateBackgroundImage()
 
-            image = sourceImage = Image.open(class_file).convert("RGBA")
+            image = sourceImage.copy().convert("RGBA")
 
             ratio = random.uniform(0.7, 2)
             image = image.resize(
@@ -217,13 +248,19 @@ def generateDorZnakiBanches(class_image_count=50000):
             # color correction, dirty window
             base_img.alpha_composite(generateBackgroundImage(transparent=random.random() * 0.4))
 
-            utils.createNoExistsFolders(DORZNAKI_PREPARED_DIR + class_name)
-            base_img.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(uuid.uuid4()) + ".png")
-            # base_img.show()
+            imagesBuffer += [base_img]
 
-            image.close()
-            sourceImage.close()
-            base_img.close()
+            # sourceImage.show()
+            # image.show()
+            # base_img.show()
+            if (len(imagesBuffer) > BACKGROUND_IMAGES_BUFFER):
+                for im in imagesBuffer:
+                    im.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(uuid.uuid4()) + ".png")
+                imagesBuffer = []
+
+        for im in imagesBuffer:
+            im.save(DORZNAKI_PREPARED_DIR + class_name + "/" + str(uuid.uuid4()) + ".png")
+        imagesBuffer = []
 
 
 if __name__ == "__main__":

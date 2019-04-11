@@ -20,7 +20,7 @@
 
 ## Точки входа
 
- * [RoadSign/createDataSetOnPatters.py](RoadSign/createDataSetOnPatters.py) - генерирование наборов картинок для обучения 
+ * [RoadSign/createDataSetOnPatters.py](RoadSign/start_createDataSetOnPatters.py) - генерирование наборов картинок для обучения 
  
  * [RoadSign/explorationDataAnalys.py](RoadSign/explorationDataAnalys.py) - аналитика по сгенерированным картинкам
  
