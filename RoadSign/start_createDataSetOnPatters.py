@@ -34,7 +34,7 @@ BACKGROUND_DIR = "datasets/background/"
 DORZNAKI_PREPARED_DIR = "datasets/DorZnaki_Prepared/"
 BACKGROUND_IMAGES = glob.glob(BACKGROUND_DIR + "*.jpg") + glob.glob(BACKGROUND_DIR + "*.png")
 
-BACKGROUND_IMAGES_BUFFER = 10
+BACKGROUND_IMAGES_BUFFER = 300
 
 backgroundImages = []
 
