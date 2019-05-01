@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 from keras.models import load_model
 
 import ImageNetModels
+import ImageNetModels.resnet as resnet
 import ImageNetModels.mobilenet as mobilenet
 import ImageNetModels.mobilenetv2 as mobilenetv2
 import ImageNetModels.xception as xception
@@ -48,6 +49,7 @@ TEST_MODELS = [
     ["inceptionv3", inceptionv3],
     ["mobilenet", mobilenet],
     ["mobilenetv2", mobilenetv2],
+    ["resnet", resnet],
     ["densenet", densenet],
     # ["nasnet", nasnet],
 ]
@@ -83,7 +85,9 @@ def next_batch(batch_size, yAsNames=False):
 if __name__ == "__main__":
     for modelSetting in TEST_MODELS:
         print("modeltraining: %s..." % (modelSetting[0]))
-        model = modelSetting[1].getModel(inputSize=IMAGE_INPUT_SIZE, classesCount=len(SOURCE_IMAGES_CLASSES))
+        model = modelSetting[1].getModel(inputSize=IMAGE_INPUT_SIZE,
+                                         classesCount=len(SOURCE_IMAGES_CLASSES),
+                                         autoSave=False)
         model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
         saveModelPath = TRAINED_MODEL_FOLDER.format(model=modelSetting[0], inputsize=str(IMAGE_INPUT_SIZE),
                                                     classes=str(len(SOURCE_IMAGES_CLASSES)))

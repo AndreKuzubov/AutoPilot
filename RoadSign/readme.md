@@ -26,18 +26,21 @@
     
         * [ ] На базе готовых
         
-            * [ ] Xception
+            * [x] Xception
             * [ ] VGG16
             * [ ] VGG19
-            * [ ] ResNet, ResNetV2, ResNeXt
-            * [ ] InceptionV3
-            * [ ] InceptionResNetV2
-            * [ ] MobileNet
-            * [ ] MobileNetV2
-            * [ ] DenseNet
-            * [ ] NASNet
+            * [x] ResNet50
+            * [ ] ResNetV2, ResNeXt
+            * [x] InceptionV3
+            * [x] InceptionResNetV2
+            * [x] MobileNet
+            * [x] MobileNetV2
+            * [x] DenseNet
+            * [x] NASNet
             
         * [ ] Собственная разработка
+        
+        * [ ] Сравнение обученных моделей на наборе [<b>GTSRB</b>](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset) и [<b>DorZnaki</b>](http://www.artpatch.ru/dorznaki.html)  
         
     * [ ] Обнаружение и локализация
     

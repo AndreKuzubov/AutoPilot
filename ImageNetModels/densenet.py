@@ -10,7 +10,7 @@ import tensorflow as tf
 DenseNet121_PATH = "log/models/DenseNet121_{input_size}_{classes}.h5"
 
 
-def getModel(inputSize, classesCount=1000):
+def getModel(inputSize, classesCount=1000,autoSave = True):
     """
 
     Получение модели ИНС для обучения.
@@ -30,7 +30,8 @@ def getModel(inputSize, classesCount=1000):
     if not os.path.exists(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))
 
-    model.save(path)
+    if (autoSave):
+        model.save(path)
     return model
 
 
