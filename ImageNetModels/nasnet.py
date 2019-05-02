@@ -10,7 +10,7 @@ import tensorflow as tf
 NASNetMobile_PATH = "log/models/NASNetMobile_{input_size}_{classes}.h5"
 
 
-def getModel(inputSize, classesCount=1000,autoSave = True):
+def getModel(inputSize, classesCount=1000, autoSave=True, path=None):
     """
 
     Получение модели ИНС для обучения.
@@ -19,7 +19,8 @@ def getModel(inputSize, classesCount=1000,autoSave = True):
             ожидается в виде массива [sizeW,sizeH,channelsCount]
     :return:
     """
-    path = NASNetMobile_PATH.format(input_size=str(inputSize), classes=str(classesCount))
+    if (path is None):
+        path = NASNetMobile_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
         return load_model(path)
 
@@ -56,9 +57,11 @@ def decodeClasses(predictedClasses, top=3, customClasses=None):
 
     return keras.applications.nasnet.decode_predictions(predictedClasses, top=top)
 
+
 def preprocess_images(imgs):
     x = np.array([image.img_to_array(img) for img in imgs])
     return keras.applications.xception.preprocess_input(x)
+
 
 def predict(model, img):
     x = image.img_to_array(img)

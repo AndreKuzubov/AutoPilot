@@ -10,7 +10,7 @@ import tensorflow as tf
 DenseNet121_PATH = "log/models/DenseNet121_{input_size}_{classes}.h5"
 
 
-def getModel(inputSize, classesCount=1000,autoSave = True):
+def getModel(inputSize, classesCount=1000, autoSave=True, path=None):
     """
 
     Получение модели ИНС для обучения.
@@ -19,11 +19,13 @@ def getModel(inputSize, classesCount=1000,autoSave = True):
             ожидается в виде массива [sizeW,sizeH,channelsCount]
     :return:
     """
-    path = DenseNet121_PATH.format(input_size=str(inputSize), classes=str(classesCount))
+    if (path is None):
+        path = DenseNet121_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
         return load_model(path)
 
-    model = keras.applications.densenet.DenseNet121(include_top=True, weights='imagenet' if classesCount == 1000 else None,
+    model = keras.applications.densenet.DenseNet121(include_top=True,
+                                                    weights='imagenet' if classesCount == 1000 else None,
                                                     input_tensor=keras.Input(shape=inputSize),
                                                     input_shape=None, pooling=None, classes=classesCount)
 

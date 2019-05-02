@@ -12,7 +12,7 @@ import tensorflow as tf
 XCEPTION_PATH = "log/models/XCEPTION_{input_size}_{classes}.h5"
 
 
-def getModel(inputSize, classesCount=1000,autoSave = True):
+def getModel(inputSize, classesCount=1000, autoSave=True, path=None):
     """
 
     Получение модели ИНС для обучения.
@@ -22,7 +22,8 @@ def getModel(inputSize, classesCount=1000,autoSave = True):
     :param classesCount: кол-во классов на выходе. Если не равно 1000, то модель не будет предобучена на наборе imagenet
     :return:
     """
-    path = XCEPTION_PATH.format(input_size=str(inputSize), classes=str(classesCount))
+    if (path is None):
+        path = XCEPTION_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
         return load_model(path)
 
@@ -56,8 +57,8 @@ def decodeClasses(predictedClasses, top=3, customClasses=None):
                 "className": ("i" + str(i), customClasses[i], pred),
                 "pred": pred
             } for i, pred in enumerate(predictClass)]
-            mapClassesBest = sorted(mapClasses, key=lambda k: k['pred'],reverse=True)
-            decodedClasses+=[ [cl["className"] for cl in mapClassesBest[:top]]]
+            mapClassesBest = sorted(mapClasses, key=lambda k: k['pred'], reverse=True)
+            decodedClasses += [[cl["className"] for cl in mapClassesBest[:top]]]
         return decodedClasses
 
     return keras.applications.xception.decode_predictions(predictedClasses, top=top)

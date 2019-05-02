@@ -84,24 +84,24 @@ def next_batch(batch_size, yAsNames=False):
 
 
 if __name__ == "__main__":
-    with open("log/models/classes_{count}.json".format(count = str(len(SOURCE_IMAGES_CLASSES))),"w+") as fl:
-        fl.write(json.dumps(SOURCE_IMAGES_CLASSES,ensure_ascii=False))
+    with open("log/models/classes_{count}.json".format(count=str(len(SOURCE_IMAGES_CLASSES))), "w+") as fl:
+        fl.write(json.dumps(SOURCE_IMAGES_CLASSES, ensure_ascii=False))
         fl.close()
-
 
     for modelSetting in TEST_MODELS:
         print("modeltraining: %s..." % (modelSetting[0]))
-        model = modelSetting[1].getModel(inputSize=IMAGE_INPUT_SIZE,
-                                         classesCount=len(SOURCE_IMAGES_CLASSES),
-                                         autoSave=False)
-        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
         saveModelPath = TRAINED_MODEL_FOLDER.format(model=modelSetting[0], inputsize=str(IMAGE_INPUT_SIZE),
                                                     classes=str(len(SOURCE_IMAGES_CLASSES)))
+        model = modelSetting[1].getModel(inputSize=IMAGE_INPUT_SIZE,
+                                         classesCount=len(SOURCE_IMAGES_CLASSES),
+                                         autoSave=False,
+                                         path=saveModelPath)
+        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
         logTrainPath = TENSOR_BOARD_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
         if not os.path.exists(logTrainPath):
             os.makedirs(logTrainPath)
 
-        for i in range(5):
+        for i in range(10):
             batch_images, batch_labels = next_batch(batch_size=10000)
             batch_x = modelSetting[1].preprocess_images(batch_images)
             batch_y = np.array(batch_labels)
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         score = model.evaluate(batch_x, batch_y, verbose=0)
         endTime = time.time()
         print("Model: %s Test score: %.4f Test accuracy: %.4f SprendTime %.4f for batch %d" % (
-        modelSetting[0], score[0], score[1], endTime - startTime, testBatchSize))
+            modelSetting[0], score[0], score[1], endTime - startTime, testBatchSize))
 
         imgs, img_names = next_batch(batch_size=20, yAsNames=True)
         batch_imgs_tensor = modelSetting[1].preprocess_images(imgs)

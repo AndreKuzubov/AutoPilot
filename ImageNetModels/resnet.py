@@ -11,7 +11,7 @@ import tensorflow as tf
 RESNET50_PATH = "log/models/RESNET50_{input_size}_{classes}.h5"
 
 
-def getModel(inputSize, classesCount=1000,autoSave = True):
+def getModel(inputSize, classesCount=1000, autoSave=True, path=None):
     """
 
     Получение модели ИНС для обучения.
@@ -20,7 +20,8 @@ def getModel(inputSize, classesCount=1000,autoSave = True):
             ожидается в виде массива [sizeW,sizeH,channelsCount]
     :return:
     """
-    path = RESNET50_PATH.format(input_size=str(inputSize), classes=str(classesCount))
+    if (path is None):
+        path = RESNET50_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
         return load_model(path)
 
