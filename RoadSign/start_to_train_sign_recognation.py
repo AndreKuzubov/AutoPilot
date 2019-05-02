@@ -21,6 +21,7 @@ from RoadSign.utils import keras_image_processing
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.models import load_model
+import json
 
 import ImageNetModels
 import ImageNetModels.resnet as resnet
@@ -83,6 +84,11 @@ def next_batch(batch_size, yAsNames=False):
 
 
 if __name__ == "__main__":
+    with open("log/models/classes_{count}.json".format(count = str(len(SOURCE_IMAGES_CLASSES))),"w+") as fl:
+        fl.write(json.dumps(SOURCE_IMAGES_CLASSES,ensure_ascii=False))
+        fl.close()
+
+
     for modelSetting in TEST_MODELS:
         print("modeltraining: %s..." % (modelSetting[0]))
         model = modelSetting[1].getModel(inputSize=IMAGE_INPUT_SIZE,

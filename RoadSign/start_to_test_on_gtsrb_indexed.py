@@ -45,12 +45,12 @@ TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}"
 IMAGE_INPUT_SIZE = [100, 100, 3]
 
 TEST_MODELS = [
-    # ["xception", xception],
-    # ["inceptionv3", inceptionv3],
-    # ["mobilenet", mobilenet],
-    # ["mobilenetv2", mobilenetv2],
+    ["xception", xception],
+    ["inceptionv3", inceptionv3],
+    ["mobilenet", mobilenet],
+    ["mobilenetv2", mobilenetv2],
     ["resnet", resnet],
-    # ["densenet", densenet],
+    ["densenet", densenet],
     # ["nasnet", nasnet],
 ]
 
