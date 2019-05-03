@@ -36,12 +36,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 TIME_TAG = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-SOURCE_IMAGES_GROP_MASK = "datasets/GTSRB_indexed/GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/*/*.ppm"
-MODEL_IMAGES_CLASSES = sorted([f[f.rfind("/") + 1:] for f in glob.glob("datasets/DorZnaki_Prepared/*")])
+SOURCE_IMAGES_GROP_MASK = "datasets/GTSRB_indexed/GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/*/*.ppm".replace("/",os.sep)
+MODEL_IMAGES_CLASSES = sorted([f[f.rfind("/") + 1:] for f in glob.glob("datasets/DorZnaki_Prepared/*".replace("/",os.sep))])
 
-PROCESSED_IMAGES_FOLDER = "log/images/{date}/{model}"
-TRAINED_MODEL_FOLDER = "log/models/{model}_{inputsize}_{classes}.h5"
-TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}"
+PROCESSED_IMAGES_FOLDER = "log/images/{date}/{model}".replace("/",os.sep)
+TRAINED_MODEL_FOLDER = "log/models/{model}_{inputsize}_{classes}.h5".replace("/",os.sep)
+TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}".replace("/",os.sep)
 IMAGE_INPUT_SIZE = [100, 100, 3]
 
 TEST_MODELS = [
@@ -72,7 +72,7 @@ def next_batch(batch_size, yAsNames=False):
     labels = []
     for imgFile in imgFiles[:batch_size]:
         label = os.path.dirname(imgFile)
-        label = label[label.rfind("/") + 1:]
+        label = label[label.rfind(os.sep) + 1:]
         images += [Image.open(imgFile).resize(IMAGE_INPUT_SIZE[:2], Image.ANTIALIAS).convert("RGB")]
 
         y = [0] * len(MODEL_IMAGES_CLASSES)
@@ -125,7 +125,7 @@ if __name__ == "__main__":
             fig.axis('off')
             fig.set_title("\n".join(['-'.join(str(p) for p in c) for c in predClasses[0]]))
             fig.imshow(img)
-            plt.savefig(processedImagesByModelFolder + "/{index}_{imagename}.png".format(imagename=imageName,
+            plt.savefig(processedImagesByModelFolder + "/{index}_{imagename}.png".replace("/",os.sep).format(imagename=imageName,
                                                                                          index=str(imageIndex)))
         sess = tf.Session()
         summary_writer = tf.summary.FileWriter(logdir=logTrainPath)

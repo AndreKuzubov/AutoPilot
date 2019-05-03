@@ -22,13 +22,15 @@ def getModel(inputSize, classesCount=1000, autoSave=True, path=None):
     if (path is None):
         path = InceptionResNetV2_PATH.format(input_size=str(inputSize), classes=str(classesCount))
     if (os.path.exists(path)):
-        return load_model(path)
+        model = load_model(path)
+        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
+        return model
 
     model = keras.applications.inception_v3.InceptionV3(include_top=True,
                                                         weights='imagenet' if classesCount == 1000 else None,
                                                         input_tensor=keras.Input(shape=inputSize),
                                                         input_shape=None, pooling=None, classes=classesCount)
-
+    model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
     if not os.path.exists(os.path.dirname(path)):
         os.makedirs(os.path.dirname(path))
 

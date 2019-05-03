@@ -37,12 +37,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 TIME_TAG = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-SOURCE_IMAGES_GROP_MASK = "datasets/DorZnaki_Prepared/*/*.png"
-SOURCE_IMAGES_CLASSES = sorted([f[f.rfind("/") + 1:] for f in glob.glob("datasets/DorZnaki_Prepared/*")])
+SOURCE_IMAGES_GROP_MASK = "datasets/DorZnaki_Prepared/*/*.png".replace("/",os.sep)
+SOURCE_IMAGES_CLASSES = sorted([f[f.rfind(os.sep) + 1:] for f in glob.glob("datasets/DorZnaki_Prepared/*".replace("/",os.sep))])
 
-PROCESSED_IMAGES_FOLDER = "log/images/{date}/{model}"
-TRAINED_MODEL_FOLDER = "log/models/{model}_{inputsize}_{classes}.h5"
-TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}"
+PROCESSED_IMAGES_FOLDER = "log/images/{date}/{model}".replace("/",os.sep)
+TRAINED_MODEL_FOLDER = "log/models/{model}_{inputsize}_{classes}.h5".replace("/",os.sep)
+TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}".replace("/",os.sep)
 IMAGE_INPUT_SIZE = [100, 100, 3]
 
 TEST_MODELS = [
@@ -73,7 +73,7 @@ def next_batch(batch_size, yAsNames=False):
     labels = []
     for imgFile in imgFiles[:batch_size]:
         label = os.path.dirname(imgFile)
-        label = label[label.rfind("/") + 1:]
+        label = label[label.rfind(os.sep) + 1:]
         images += [Image.open(imgFile).convert("RGB")]
 
         y = [0] * len(SOURCE_IMAGES_CLASSES)
@@ -84,7 +84,7 @@ def next_batch(batch_size, yAsNames=False):
 
 
 if __name__ == "__main__":
-    with open("log/models/classes_{count}.json".format(count=str(len(SOURCE_IMAGES_CLASSES))), "w+") as fl:
+    with open("log/models/classes_{count}.json".replace("/",os.sep).format(count=str(len(SOURCE_IMAGES_CLASSES))), "w+") as fl:
         fl.write(json.dumps(SOURCE_IMAGES_CLASSES, ensure_ascii=False))
         fl.close()
 
@@ -96,7 +96,6 @@ if __name__ == "__main__":
                                          classesCount=len(SOURCE_IMAGES_CLASSES),
                                          autoSave=False,
                                          path=saveModelPath)
-        model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
         logTrainPath = TENSOR_BOARD_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
         if not os.path.exists(logTrainPath):
             os.makedirs(logTrainPath)
@@ -167,7 +166,7 @@ if __name__ == "__main__":
             fig.axis('off')
             fig.set_title("\n".join(['-'.join(str(p) for p in c) for c in predClasses[0]]))
             fig.imshow(img)
-            plt.savefig(processedImagesByModelFolder + "/{index}_{imagename}.png".format(imagename=imageName,
+            plt.savefig(processedImagesByModelFolder + "/{index}_{imagename}.png".replace("/",os.sep).format(imagename=imageName,
                                                                                          index=str(imageIndex)))
         sess = tf.Session()
         summary_writer = tf.summary.FileWriter(logdir=logTrainPath)
