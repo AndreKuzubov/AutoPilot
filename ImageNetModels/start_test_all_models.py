@@ -21,6 +21,7 @@ import ImageNetModels.mobilenetv2 as mobilenetv2
 import ImageNetModels.xception as xception
 import ImageNetModels.vgg16 as vgg16
 import ImageNetModels.inceptionv3 as inceptionv3
+import ImageNetModels.resnet as resnet
 import ImageNetModels.densenet as densenet
 import ImageNetModels.nasnet as nasnet
 
@@ -45,6 +46,7 @@ TEST_MODELS = [
     ["inceptionv3", inceptionv3],
     ["mobilenet", mobilenet],
     ["mobilenetv2", mobilenetv2],
+    ["resnet", resnet],
     ["densenet", densenet],
     ["nasnet", nasnet],
 ]
