@@ -96,6 +96,7 @@ if __name__ == "__main__":
             os.makedirs(processedImagesByModelFolder)
 
         model = load_model(loadModelPath)
+        print(model.summary())
 
         batch_images, batch_labels = next_batch(batch_size=testBatchSize)
         batch_x = modelSetting[1].preprocess_images(batch_images)

@@ -96,6 +96,7 @@ if __name__ == "__main__":
                                          classesCount=len(SOURCE_IMAGES_CLASSES),
                                          autoSave=False,
                                          path=saveModelPath)
+        print(model.summary())
         logTrainPath = TENSOR_BOARD_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
         if not os.path.exists(logTrainPath):
             os.makedirs(logTrainPath)
