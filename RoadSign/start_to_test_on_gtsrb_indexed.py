@@ -30,18 +30,23 @@ import ImageNetModels.xception as xception
 import ImageNetModels.inceptionv3 as inceptionv3
 import ImageNetModels.densenet as densenet
 import ImageNetModels.nasnet as nasnet
+import json
 
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 TIME_TAG = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
-SOURCE_IMAGES_GROP_MASK = "datasets/GTSRB_indexed/GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/*/*.ppm".replace("/",os.sep)
-MODEL_IMAGES_CLASSES = sorted([f[f.rfind("/") + 1:] for f in glob.glob("datasets/DorZnaki_Prepared/*".replace("/",os.sep))])
+SOURCE_IMAGES_GROP_MASK = "datasets/GTSRB_indexed/GTSRB_Final_Training_Images/GTSRB/Final_Training/Images/*/*.ppm".replace(
+    "/", os.sep)
+# MODEL_IMAGES_CLASSES = sorted(
+#     [f[f.rfind("/") + 1:] for f in glob.glob("datasets/DorZnaki_Prepared/*".replace("/", os.sep))])
+MODEL_IMAGES_CLASSES = json.loads(open("log/models/classes_51.json".replace("/", os.sep), "r").read())
 
-PROCESSED_IMAGES_FOLDER = "log/images/{date}/{model}".replace("/",os.sep)
-TRAINED_MODEL_FOLDER = "log/models/{model}_{inputsize}_{classes}.h5".replace("/",os.sep)
-TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}".replace("/",os.sep)
+PROCESSED_IMAGES_FOLDER = "log/images/{date}/{model}".replace("/", os.sep)
+TRAINED_MODEL_PATH = "log/models/{model}_{inputsize}_{classes}.h5".replace("/", os.sep)
+TRAINED_MODELS_FOLDER = "log/models".replace("/", os.sep)
+TENSOR_BOARD_FOLDER = "log/tensorboard/{date}/{model}".replace("/", os.sep)
 IMAGE_INPUT_SIZE = [100, 100, 3]
 
 TEST_MODELS = [
@@ -82,14 +87,24 @@ def next_batch(batch_size, yAsNames=False):
     return images, labels
 
 
+def printAllModelsSummary():
+    modelsFiles = glob.glob(TRAINED_MODELS_FOLDER + os.sep + "MobileNet_[100, 100, 3]_28.h5")
+    for fileName in [TRAINED_MODELS_FOLDER + os.sep + "densenet_[100, 100, 3]_28.h5"]:
+        model = load_model(fileName)
+        print("\n\nmodel %s" % (fileName))
+        print(model.summary())
+
+
 if __name__ == "__main__":
+    # printAllModelsSummary()
+
     for modelSetting in TEST_MODELS:
         print("modeltesting on GTSRB_indexed: %s..." % (modelSetting[0]))
         testBatchSize = 100
         processedImagesByModelFolder = PROCESSED_IMAGES_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
         logTrainPath = TENSOR_BOARD_FOLDER.format(date=TIME_TAG, model=modelSetting[0])
-        loadModelPath = TRAINED_MODEL_FOLDER.format(model=modelSetting[0], inputsize=str(IMAGE_INPUT_SIZE),
-                                                    classes=str(len(MODEL_IMAGES_CLASSES)))
+        loadModelPath = TRAINED_MODEL_PATH.format(model=modelSetting[0], inputsize=str(IMAGE_INPUT_SIZE),
+                                                  classes=str(len(MODEL_IMAGES_CLASSES)))
         if not os.path.exists(logTrainPath):
             os.makedirs(logTrainPath)
         if not os.path.exists(processedImagesByModelFolder):
